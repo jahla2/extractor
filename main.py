@@ -1,11 +1,11 @@
 import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from internal.infrastructure.parsers.document_template_parser import DocumentTemplateParserImpl
-from internal.infrastructure.parsers.ocr_data_parser import OCRDataParserImpl
-from internal.infrastructure.factory.document_extractor_factory import create_document_extractor
-from internal.presentation.handlers.extraction_handler import ExtractionHandler
-from internal.presentation.handlers.health_handler import HealthHandler
+from src.infrastructure.parsers.document_template_parser import DocumentTemplateParserImpl
+from src.infrastructure.parsers.ocr_data_parser import OCRDataParserImpl
+from src.infrastructure.factory.document_extractor_factory import create_document_extractor
+from src.presentation.handlers.extraction_handler import ExtractionHandler
+from src.presentation.handlers.health_handler import HealthHandler
 
 
 class ApplicationDependencies:
