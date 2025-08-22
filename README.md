@@ -27,9 +27,26 @@ internal/
 
 - **Pure Algorithm Implementation**: Core extraction uses only Python standard library (math, json, re)
 - **Lightweight & Fast**: Zero external dependencies for processing algorithms
-- **Adaptive Template-Based Extraction**: Automatically adjusts extraction parameters based on document characteristics
-- **Multi-Vendor Support**: Works with documents from NZ, US, and AU regions
-- **Multi-Line Entry Processing**: Intelligently merges continuation lines
+
+### Advanced Extraction Algorithms
+
+- **Adaptive Template-Based Extraction**: Dynamically calculates row tolerances, column stretching, and header padding based on document density, spacing variability, and layout characteristics
+
+- **Voronoi-Style Column Stretching**: When multi-line content overflows, columns intelligently expand into adjacent empty spaces using stretch factors (0.75-0.95) based on column count and document density
+
+- **Multi-Line Entry Processing**: 
+  - Detects continuation lines with fewer meaningful fields than parent lines
+  - Recognizes structured data (dates: dd/mm/yyyy, currency: $, AUD, reference codes: INV-, PO-)
+  - Merges text with continuation markers (&, comma, ellipsis, semicolon, backslash)
+  - Smart text joining with proper spacing and marker removal
+
+- **Document Region Analysis**: 
+  - Auto-detects header (0-25%), data (25-80%), footer (80-100%) regions
+  - Calculates token distribution and density per region
+  - Adapts extraction parameters based on regional characteristics
+
+- **Multi-Vendor Document Support**: Optimized patterns for NZ, US, and AU document formats including currency symbols, date formats, and reference number patterns
+
 - **Clean Architecture**: Follows SOLID principles with dependency inversion
 - **Minimal Dependencies**: Only FastAPI for web interface, pure Python for all algorithms
 
@@ -41,16 +58,26 @@ internal/
 - `DocumentTemplate`: JSON-defined document structure
 - `ExtractionResult`: Structured output with header and lines
 
-### Adaptive Algorithm
-- Analyzes document characteristics (row spacing, density, variability)
-- Calculates optimal thresholds dynamically
-- Supports Voronoi-like column stretching
-- Handles irregular document layouts
+### Adaptive Algorithm Details
+- **Document Characteristics Analysis**: 
+  - Row spacing statistics (average, median, min/max, variability coefficient)
+  - Column width calculations and document density metrics
+  - Header height detection and line count estimation
+- **Dynamic Threshold Calculation**:
+  - Row tolerance: `median_spacing * 0.5` (adjusted for variability 0.005-0.025 range)
+  - Column stretch: Base 0.85, reduced to 0.75 for >6 columns, increased to 0.95 for <4 columns
+  - Header padding: `avg_row_spacing * 0.3` with minimum based on header height
 
-### Multi-Line Processing
-- Detects continuation patterns for NZ/US/AU documents
-- Recognizes date formats, currency patterns, reference numbers
-- Smart text merging with continuation markers
+### Multi-Line Processing Details
+- **Continuation Detection**: Lines with fewer non-empty fields than predecessor
+- **Structured Field Recognition**:
+  - Date patterns: "/" or "-" with digits, "." in single words
+  - Currency: $¢€£¥, USD/AUD/NZD/CAD codes, decimal/comma separators
+  - Reference fields: alphanumeric with INV/PO/REF/IV prefixes, or 6+ char codes
+- **Smart Text Merging**:
+  - Continuation markers: &, comma, -, ..., ;, :, \, /, +, "cont", "continued", "(cont)"
+  - Marker-specific joining: & removes marker + space, comma/dash direct append
+  - Ellipsis trimming, colon/semicolon space addition
 
 ## Installation
 
