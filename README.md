@@ -30,22 +30,22 @@ internal/
 
 ### Advanced Extraction Algorithms
 
-- **Adaptive Template-Based Extraction**: Dynamically calculates row tolerances, column stretching, and header padding based on document density, spacing variability, and layout characteristics
+- **Smart Template Adaptation**: Automatically adjusts how strictly it follows templates based on how messy or clean the document is
 
-- **Voronoi-Style Column Stretching**: When multi-line content overflows, columns intelligently expand into adjacent empty spaces using stretch factors (0.75-0.95) based on column count and document density
+- **Voronoi Column Stretching**: When text is too long for a column, it smartly stretches into the next empty column to grab the complete text, like expanding a box to fit longer content
 
-- **Multi-Line Entry Processing**: 
-  - Detects continuation lines with fewer meaningful fields than parent lines
-  - Recognizes structured data (dates: dd/mm/yyyy, currency: $, AUD, reference codes: INV-, PO-)
-  - Merges text with continuation markers (&, comma, ellipsis, semicolon, backslash)
-  - Smart text joining with proper spacing and marker removal
+- **Multi-Line Text Merging**: 
+  - Spots when text continues on the next line (like addresses or descriptions)
+  - Recognizes important data types (dates, money amounts, invoice numbers)
+  - Joins split text back together with proper spacing
+  - Handles continuation symbols (like & or ... at the end of lines)
 
-- **Document Region Analysis**: 
-  - Auto-detects header (0-25%), data (25-80%), footer (80-100%) regions
-  - Calculates token distribution and density per region
-  - Adapts extraction parameters based on regional characteristics
+- **Document Layout Detection**: 
+  - Automatically finds header area, main data section, and footer
+  - Learns each section's text patterns and density
+  - Adjusts extraction rules for each section type
 
-- **Multi-Vendor Document Support**: Optimized patterns for NZ, US, and AU document formats including currency symbols, date formats, and reference number patterns
+- **Multi-Country Format Support**: Understands different document styles from New Zealand, US, and Australia including their currency symbols, date formats, and business reference patterns
 
 - **Clean Architecture**: Follows SOLID principles with dependency inversion
 - **Minimal Dependencies**: Only FastAPI for web interface, pure Python for all algorithms
@@ -58,26 +58,27 @@ internal/
 - `DocumentTemplate`: JSON-defined document structure
 - `ExtractionResult`: Structured output with header and lines
 
-### Adaptive Algorithm Details
-- **Document Characteristics Analysis**: 
-  - Row spacing statistics (average, median, min/max, variability coefficient)
-  - Column width calculations and document density metrics
-  - Header height detection and line count estimation
-- **Dynamic Threshold Calculation**:
-  - Row tolerance: `median_spacing * 0.5` (adjusted for variability 0.005-0.025 range)
-  - Column stretch: Base 0.85, reduced to 0.75 for >6 columns, increased to 0.95 for <4 columns
-  - Header padding: `avg_row_spacing * 0.3` with minimum based on header height
+### How the Smart Algorithms Work
 
-### Multi-Line Processing Details
-- **Continuation Detection**: Lines with fewer non-empty fields than predecessor
-- **Structured Field Recognition**:
-  - Date patterns: "/" or "-" with digits, "." in single words
-  - Currency: $¢€£¥, USD/AUD/NZD/CAD codes, decimal/comma separators
-  - Reference fields: alphanumeric with INV/PO/REF/IV prefixes, or 6+ char codes
-- **Smart Text Merging**:
-  - Continuation markers: &, comma, -, ..., ;, :, \, /, +, "cont", "continued", "(cont)"
-  - Marker-specific joining: & removes marker + space, comma/dash direct append
-  - Ellipsis trimming, colon/semicolon space addition
+**Document Analysis Process**:
+- Measures how much space is between rows and how consistent it is
+- Calculates how wide columns are and how packed with text the document is
+- Figures out where the header ends and data begins
+
+**Adaptive Rules**:
+- For messy documents with inconsistent spacing: becomes more flexible with alignment
+- For documents with many narrow columns: stretches less to avoid overlap
+- For documents with few wide columns: stretches more to capture long text
+- Adjusts header detection based on how much text is at the top
+
+**Multi-Line Text Handling**:
+- Spots continuation lines by counting how many fields have data (fewer = likely continuation)
+- Recognizes structured data like dates (slashes/dashes), money (dollar signs), invoice numbers (starts with INV/PO)
+- Joins text intelligently based on continuation symbols:
+  - Ampersand (&): removes symbol and adds space
+  - Commas/dashes: joins directly without space
+  - Ellipsis (...): removes dots and adds space
+  - Colons/semicolons: keeps symbol and adds space
 
 ## Installation
 
